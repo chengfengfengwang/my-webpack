@@ -1,3 +1,7 @@
-import {add} from './math.js';
+let a = require('a.js');
+let b = require('b.js');
+let c = require('c.js');
 
-console.log(add(2, 3))
+a();
+b();
+c();

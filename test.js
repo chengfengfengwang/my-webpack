@@ -85,7 +85,7 @@
    queue.forEach(function (mod) {
      modules += `'${mod.fileName}': function (require, module, exports) { ${mod.code} },`
    })
-   console.log('--', modules)
+  
    const result = `
      (function(modules) {
        function require(fileName) {
@@ -115,4 +115,4 @@ function bundleFile(option) {
 }
 
 // console.log(bundleFile({entry: './src/index.js'}))
-bundleFile({entry: './src/index.js'})
+console.log(bundleFile({entry: './src/index.js'}))
