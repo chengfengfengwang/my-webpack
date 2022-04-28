@@ -36,7 +36,7 @@ function createResult(moduleParam) {
     // 执行入口文件
     require('index.js')
   })({${moduleParam}})`;
-  fs.writeFileSync('./dist/index.js', result);
+  fs.writeFileSync('./dist/bundle.js', result);
 }
 
 

@@ -1,3 +1,11 @@
+执行方式
+```
+node index.js
+```
+会把 src里的文件打包到dist/bundle.js
+在浏览器运行`index.html`查看代码执行
+
+
 # 实现简单的webpack打包器
 
 # 目标
@@ -84,4 +92,54 @@ module.exports = function () {
 }
 ```
 
-# 拼接入口和依赖模块
+# 拼接入口依赖模块
+接上一节，我们需要找出所有用到的文件，比如a依赖b，b依赖c，c依赖d；需要把a、b、c的文件都找到，拼到最终打包函数的参数上
+```
+function createGraph(path, graph = {}) {
+  const content = fs.readFileSync(`${basePath}${path}`, 'utf-8');
+  // 使用正则匹配 require依赖
+  const reg = /require\(['"](.+)['"]\)/g;
+  const matchAllResult = content.matchAll(reg);
+  graph[path] = ` function(require, module, exports) {${content}}`;
+  for (const match of matchAllResult) {
+    // 递归找依赖
+    graph = {...graph, ...createGraph(match[1])} 
+  }
+  return graph
+}
+```
+包装依赖函数
+```
+function createModuleParam(graph) {
+  let result = '';
+  for (const key in graph) {
+    if (Object.hasOwnProperty.call(graph, key)) {
+      result += `'${key}': ${graph[key]},`
+    }
+  }
+  return result
+}
+```
+# 生成bundle.js
+从第一节**目标**里观察到我们的bundle.js变量只是参数部分，所以生成最终文件如下:
+```
+function createResult(moduleParam) {
+  const result = `(function(modules){ // 接收一个模块对象
+    // 实现require函数
+    // require函数需要具备两个功能：
+    // 1. require('a.js')时要执行a.js
+    // 2. const a = require('a.js')时需要把a.js里的导出内容返回出来
+    function require(path) {
+      var fn = modules[path]; // 根据路径找到源码
+      var module = {
+        exports: {}
+      };
+      fn(require, module, module.exports); // 功能1:执行源码
+      return module.exports // 功能2:返回模块导出内容
+    };
+    // 执行入口文件
+    require('index.js')
+  })({${moduleParam}})`;
+  fs.writeFileSync('./dist/index.js', result);
+}
+```
