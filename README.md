@@ -1,5 +1,6 @@
 执行方式
 ```
+npm install
 node index.js
 ```
 会把 src里的文件打包到dist/bundle.js
